@@ -132,4 +132,45 @@ export class Board{
 
         return randomNum<=0.5
     }
+
+    shipExists(coords){
+        
+        return (this.board[coords[0]][coords[1]] >= 2 && this.board[coords[0]][coords[1]] <= 5) || this.board[coords[0]][coords[1]] == 33
+    }
+
+    completeShipWithNumExists(shipNum){
+        for(let i = 0; i < this.board.length; i++){
+            for(let j = 0; j < this.board[i].length; j++){
+                if(this.board[i][j] == shipNum){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    gameOver(){
+        for(let i = 2; i <= 5; i++){
+            if(this.completeShipWithNumExists(i)){
+                return false;
+            }
+        }
+
+        return !this.completeShipWithNumExists(33);
+    }
+
+    withinBounds(coords){
+        return (coords[0] >= 0 && coords[0]<= 9) && (coords[1] >= 0 && coords[1] <= 9);
+    }
+
+
+    get(coords){
+        return this.board[coords[0]][coords[1]];
+    }
+
+    set(coords, num){
+        this.board[coords[0]][coords[1]] = num;
+    }
 }

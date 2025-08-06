@@ -75,6 +75,32 @@ function removeHighlighting(list){
     }
 }
 
+
+
+
+function offsetPos(radiusCenter, offset){
+    let center = [radiusCenter[0], radiusCenter[1]];
+    if(offset == 1){
+        center[1] += 1;
+    }else if(offset == 2){
+        center[0] += 1;
+    }else if(offset == 3){
+        center[1] -= 1;
+    }else{
+        center[0] -= 1;
+    }
+
+    return center;
+}
+
+
+
+let center = null
+let lockedIn = false;
+let offset = 1;
+let adder = 0;
+let lockedShip = 0;
+
 function createDiv(status, row, col, player=true){
 
     let box=document.createElement("div");
@@ -113,12 +139,197 @@ function createDiv(status, row, col, player=true){
         }
     }else{
         box.onclick = (e) => {
+            if(gameStarted){
             //handle marking and hitting.
+                let coords = getCoords(e.target.id);
+                console.log("Ship exists when clicked: " + compBoard.shipExists(coords));
+                if(compBoard.shipExists(coords)){
+                    let damagedShip = compBoard.board[coords[0]][coords[1]]
+                    compBoard.board[coords[0]][coords[1]] = 7;
+                    e.target.className = "box hit";
+                    if(!compBoard.completeShipWithNumExists(damagedShip)){
+                        alertDeadShip("player", damagedShip);
+                    }
+
+                    if(compBoard.gameOver()){
+                        console.log(compBoard.board);
+                        alert("Player won!");
+                        window.location.reload();
+                        //reset the game
+                    }
+                    
+                }else{
+                    if(compBoard.board[coords[0]][coords[1]] == 1){
+
+                        alert("choose a square that hasn't been marked!")
+                        return;
+                    }else{
+                        compBoard.board[coords[0]][coords[1]] = 1;
+                        e.target.className = "box marked";
+                    }
+                }
+
+                //-----computer logic here
+                
+                if(center == null){
+                    let randomPos = getNewPos();
+
+                    if(playerBoard.shipExists(randomPos)){
+                        lockedShip = playerBoard.get(randomPos);
+                        setUIBoard(playerUIBoard, randomPos, "box hit");
+                        playerBoard.set(randomPos, 7);
+                        center = randomPos;
+                    }else{
+                        setUIBoard(playerUIBoard, randomPos, "box marked");
+                        playerBoard.set(randomPos, 1);
+                    }
+                }else{
+                    if(!lockedIn){
+                        console.log("here!!!")
+                        //offset is always at 1 at this point
+                        let newPos = offsetPos(center, offset);
+                        while(!playerBoard.withinBounds(newPos) || playerBoard.get(newPos) == 7 || playerBoard.get(newPos) == 1){
+                            offset++;
+                            newPos = offsetPos(center, offset);
+                        }
+
+                        if(playerBoard.shipExists(newPos) && lockedShip == playerBoard.get(newPos)){
+                            setUIBoard(playerUIBoard, newPos, "box hit");
+                            playerBoard.set(newPos, 7);
+                            adder = 2;
+                            lockedIn = true;
+
+                        }else{
+
+                            if(playerBoard.get(newPos) == 0){
+                                setUIBoard(playerUIBoard, newPos, "box marked");
+                                playerBoard.set(newPos, 1);
+                            }else if(playerBoard.shipExists(newPos)){
+                                let newShipNum = playerBoard.get(newPos);
+                                setUIBoard(playerUIBoard, newPos, "box hit");
+                            }
+
+                        }
+                    }else{
+                        let nextPos = performAdding(center, offset, adder);
+                        console.log("after locking in: here is the position we tried: " + nextPos);
+
+                        if(
+                            playerBoard.withinBounds(nextPos) &&
+                            playerBoard.shipExists(nextPos) &&
+                            playerBoard.get(nextPos) == lockedShip
+                        ){
+                            setUIBoard(playerUIBoard, nextPos, "box hit");
+                            playerBoard.set(nextPos, 7);
+                            adder++;
+                        }else{
+                            if(playerBoard.completeShipWithNumExists(lockedShip)){
+                                if(playerBoard.withinBounds(nextPos) && playerBoard.get(nextPos) == 0){
+                                    setUIBoard(playerUIBoard, nextPos, "box marked")
+                                    playerBoard.set(nextPos, 1);
+                                    if(adder >= 0){
+                                        adder = -1;
+                                    }else{
+                                        adder -= 1;
+                                    }
+                                }else{
+                                    if(adder >= 0){
+						                adder = -1;
+					                }else{
+						                adder -= 1;
+					                }
+
+                                    nextPos = performAdding(center, offset, adder);
+                                    setUIBoard(playerUIBoard, nextPos, "box hit");
+                                    playerBoard.set(nextPos, 7);
+                                }
+                            }
+                            
+                            if(!playerBoard.completeShipWithNumExists(lockedShip)){
+                                //ship is dead
+
+                                adder = 0;
+                                center = null;
+                                lockedIn = false;
+                                offset = 1;
+                                lockedShip = 0;
+
+                            }
+                        }
+                    }
+                }
+
+
+            }
+
+            if(playerBoard.gameOver){
+                alert("Computer has won!");
+                window.location.reload();
+            }
+
         }
     }
 
     return box;
 
+}
+
+function setUIBoard(uiBoard, coords, classText){
+    uiBoard.querySelector(`[id="${coords[0]} ${coords[1]}"]`).className = classText;
+}
+
+function performAdding(center, offset, add){
+    let n = [center[0], center[1]];
+
+    if(offset == 1){
+        n[1] += add;
+    }else if(offset == 2){
+        n[0] += add;
+    }else if(offset == 3){
+        n[1] -= add;
+    }else{
+        n[0] -= add;
+    }
+
+    return n;
+}
+
+function getNewPos(){
+    let pos = playerBoard.getRandom();
+
+    while(playerBoard.board[pos[0]][pos[1]] == 7 || playerBoard.board[pos[0]][pos[1]] == 1){
+        pos = playerBoard.getRandom();
+    }
+
+    return pos;
+}
+
+
+
+function getClassNameByNum(boardNum){
+    if((boardNum >= 2 && boardNum <= 5) || boardNum == 33){
+        return "occupied";
+    }else if(boardNum == 0){
+        return "empty";
+    }else if(boardNum == 1){
+        return "marked";
+    }else{
+        return "hit";
+    }
+}
+
+function alertDeadShip(pOrC, shipNum){
+    if(shipNum == 2){
+        alert(pOrC + " destroyed a: destroyer!");
+    }else if(shipNum == 3){
+        alert(pOrC + " destroyed a: cruiser!");
+    }else if(shipNum == 4){
+        alert(pOrC + " destroyed a: battleship!");
+    }else if(shipNum == 5){
+        alert(pOrC + " destroyed a: carrier!");
+    }else if(shipNum == 33){
+        alert(pOrC + " destroyed a: submarine!");
+    }
 }
 
 function handleShipsLogic(box){
@@ -262,6 +473,6 @@ function updateColor(box, num){
     }else if(num <= 5 && num >= 2 || num > 15){
         box.className = "box occupied";
     }else if(num == 7){
-        box.className = "hit";
+        box.className = "box hit";
     }
 }
