@@ -22,6 +22,10 @@
         .occupied{
             background-color:yellow;
         }
+
+        .highlight{
+            background-color:aquamarine;
+        }
     </style>
     <script src="main.js" type="module" defer></script>
 </head>
@@ -29,14 +33,28 @@
     <header style="text-align:center; margin-top: 20px; margin-bottom: 20px;">
         <h1 style="font-family: Arial, sans-serif; color: navy; letter-spacing: 2px;">BattleShip</h1>
     </header>
-    <div>
-    <section>
-        <!-- Generate 10 of these per section.-->
-        <div class="box empty">
 
+    <main>
+
+    </main>
+
+    <footer>
+        <div style="text-align:center; margin-top:20px;">
+            <button type="button" class="box occupied" title="Carrier (5)" id="carrier">Carrier (5)</button>
+            <button type="button" class="box occupied" title="Battleship (4)" id="battleship">Battleship (4)</button>
+            <button type="button" class="box occupied" title="Cruiser (3)" id="cruiser">Cruiser (3)</button>
+            <button type="button" class="box occupied" title="Submarine (3)" id="submarine">Submarine (3)</button>
+            <button type="button" class="box occupied" title="Destroyer (2)" id="destroyer">Destroyer (2)</button>
         </div>
-    </section>
-    </div>
-    
+        <button id="rotate" style="margin: 10px;" title="Rotate">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 3v2.5A5.5 5.5 0 1 1 4.5 11" stroke="black" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <polygon points="10,1 13,5 7,5" fill="black"/>
+            </svg>
+        </button>
+        <button id="play">
+            Play!
+        </button>
+    </footer>
 </body>
 </html>
