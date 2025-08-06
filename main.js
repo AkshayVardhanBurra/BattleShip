@@ -126,7 +126,11 @@ function createDiv(status, row, col, player=true){
         }
     }
 
-    
+    function alertIfShipDead(randomPos, killer){
+        if(!playerBoard.completeShipWithNumExists(playerBoard.get(randomPos))){
+                            alertDeadShip(killer, playerBoard.get(randomPos));
+        }
+    }
 
     if(player){
         box.onclick = (e) => {
@@ -147,9 +151,7 @@ function createDiv(status, row, col, player=true){
                     let damagedShip = compBoard.board[coords[0]][coords[1]]
                     compBoard.board[coords[0]][coords[1]] = 7;
                     e.target.className = "box hit";
-                    if(!compBoard.completeShipWithNumExists(damagedShip)){
-                        alertDeadShip("player", damagedShip);
-                    }
+
 
                     if(compBoard.gameOver()){
                         console.log(compBoard.board);
@@ -177,6 +179,7 @@ function createDiv(status, row, col, player=true){
                     if(playerBoard.shipExists(randomPos)){
                         lockedShip = playerBoard.get(randomPos);
                         setUIBoard(playerUIBoard, randomPos, "box hit");
+     
                         playerBoard.set(randomPos, 7);
                         center = randomPos;
                     }else{
@@ -195,6 +198,7 @@ function createDiv(status, row, col, player=true){
 
                         if(playerBoard.shipExists(newPos) && lockedShip == playerBoard.get(newPos)){
                             setUIBoard(playerUIBoard, newPos, "box hit");
+
                             playerBoard.set(newPos, 7);
                             adder = 2;
                             lockedIn = true;
@@ -205,8 +209,11 @@ function createDiv(status, row, col, player=true){
                                 setUIBoard(playerUIBoard, newPos, "box marked");
                                 playerBoard.set(newPos, 1);
                             }else if(playerBoard.shipExists(newPos)){
-                                let newShipNum = playerBoard.get(newPos);
+                                
+
                                 setUIBoard(playerUIBoard, newPos, "box hit");
+
+                                playerBoard.set(newPos, 7);
                             }
 
                         }
@@ -219,9 +226,15 @@ function createDiv(status, row, col, player=true){
                             playerBoard.shipExists(nextPos) &&
                             playerBoard.get(nextPos) == lockedShip
                         ){
+                            console.log("here is nextPos: " + nextPos);
                             setUIBoard(playerUIBoard, nextPos, "box hit");
+                            
                             playerBoard.set(nextPos, 7);
-                            adder++;
+                            if(adder >= 0){
+                                adder++;
+                            }else{
+                                adder--;
+                            }
                         }else{
                             if(playerBoard.completeShipWithNumExists(lockedShip)){
                                 if(playerBoard.withinBounds(nextPos) && playerBoard.get(nextPos) == 0){
@@ -241,18 +254,37 @@ function createDiv(status, row, col, player=true){
 
                                     nextPos = performAdding(center, offset, adder);
                                     setUIBoard(playerUIBoard, nextPos, "box hit");
+  
                                     playerBoard.set(nextPos, 7);
                                 }
                             }
                             
                             if(!playerBoard.completeShipWithNumExists(lockedShip)){
                                 //ship is dead
-
+                                alertDeadShip('computer', lockedShip);
+                                console.log("here a ship is recognized as dead!")
                                 adder = 0;
                                 center = null;
                                 lockedIn = false;
                                 offset = 1;
                                 lockedShip = 0;
+                                
+                                
+
+
+                                let randomPos = getNewPos();
+
+                    if(playerBoard.shipExists(randomPos)){
+                        lockedShip = playerBoard.get(randomPos);
+                        setUIBoard(playerUIBoard, randomPos, "box hit");
+                      
+                        playerBoard.set(randomPos, 7);
+                        center = randomPos;
+                    }else{
+                        setUIBoard(playerUIBoard, randomPos, "box marked");
+                        playerBoard.set(randomPos, 1);
+                    }
+
 
                             }
                         }
@@ -262,7 +294,7 @@ function createDiv(status, row, col, player=true){
 
             }
 
-            if(playerBoard.gameOver){
+            if(playerBoard.gameOver()){
                 alert("Computer has won!");
                 window.location.reload();
             }
