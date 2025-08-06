@@ -296,8 +296,12 @@ function createDiv(status, row, col, player=true){
 
 
             }
+            
+            
+            // this condition not tested yet
 
-            if(playerBoard.gameOver()){
+
+            if(playerBoard.gameOver() && gameStarted){
                 alert("Computer has won!");
                 window.location.reload();
             }
