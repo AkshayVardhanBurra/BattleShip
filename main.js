@@ -151,7 +151,10 @@ function createDiv(status, row, col, player=true){
                     let damagedShip = compBoard.board[coords[0]][coords[1]]
                     compBoard.board[coords[0]][coords[1]] = 7;
                     e.target.className = "box hit";
-
+                    
+                    if(!compBoard.completeShipWithNumExists(damagedShip)){
+                        alertDeadShip("Player", damagedShip);
+                    }
 
                     if(compBoard.gameOver()){
                         console.log(compBoard.board);
