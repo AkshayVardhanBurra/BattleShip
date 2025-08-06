@@ -415,10 +415,19 @@ let compBoard = new Board();
 
 const playerUIBoard = createBoard(true);
 const compUIBoard = createBoard(false);
-
+body.appendChild(createHeading("Player Board: "));
 body.appendChild(playerUIBoard);
+
+body.appendChild(createHeading("Computer Board: (dont touch this board until all ships are placed. there is some bug rn....)"));
 body.appendChild(compUIBoard);
 
+
+function createHeading(text){
+    let h3 = document.createElement("h3");
+    h3.innerText = text;
+
+    return h3;
+}
 //------------------------------------------
 
 
@@ -430,8 +439,9 @@ document.getElementById("play").onclick = (e) => {
         //basically enables div onclicks to work
         gameStarted = true;
         compBoard.placeShipsRandomly();
+        console.log("compboard:")
         console.log(compBoard.board);
-        updateAllDivs(compBoard, compUIBoard);
+
         rotate.remove();
         e.target.remove();
         
